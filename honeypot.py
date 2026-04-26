@@ -14,7 +14,7 @@ import paramiko
 
 from Database.log_database import create_database
 
-from server import HoneypotServer
+from server import HoneypotServer, connect_to_decoy, forward_data
 
 # Host Key 
 
@@ -56,8 +56,33 @@ def handle_connection(client_socket, client_address):
             return
 
         logging.info(f"{ip} opened a shell channel")
-        channel.send(b"Welcome to Ubuntu 22.04 LTS\r\n")
-        channel.close()
+        
+        ssh_client, decoy_channel = connect_to_decoy()
+
+        if decoy_channel is None:
+            attacker_channel.send(b"Service unavailable\r\n")
+            attacker_channel.close()
+            return
+
+        thread1 = threading.Thread(
+            target=forward_data,
+            args=(attacker_channel, decoy_channel, "attacker_to_decoy", ip)
+        )
+
+        thread2 = threading.Thread(
+            target=forward_data,
+            args=(decoy_channel, attacker_channel, "decoy_to_attacker", ip)
+        )
+
+        thread1.daemon = True
+        thread2.daemon = True
+
+
+        thread1.start()
+        thread2.start()
+
+        thread1.join()
+        thread2.join()
 
 
     except Exception as e:
