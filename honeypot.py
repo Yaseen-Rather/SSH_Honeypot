@@ -49,9 +49,9 @@ def handle_connection(client_socket, client_address):
         server = HoneypotServer(ip)
         transport.start_server(server=server)
 
-        channel = transport.accept(20)
+        attacker_channel = transport.accept(20)
 
-        if channel is None:
+        if attacker_channel is None:
             logging.warning(f"{ip} connected but never opened a channel")
             return
 

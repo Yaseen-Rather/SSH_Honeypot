@@ -17,7 +17,7 @@ from Database.log_database import log_attempt
 # Decoy VM Credentaials
 
 Decoy_ip = "192.168.159.130"
-Decoy_port = "22"
+Decoy_port = 22
 Decoy_username = "whosyourdaddy"
 Decoy_password = "yaseen"
 
@@ -78,8 +78,7 @@ class HoneypotServer(paramiko.ServerInterface):
         if username not in self.attempts_counter:
 
             self.attempts_counter[username] = 0
-            #self.thresholds[username] = random.randint(2, 5)
-            self.thresholds[username] = 1
+            self.thresholds[username] = random.randint(2, 5)
 
         # increment the counter
 
