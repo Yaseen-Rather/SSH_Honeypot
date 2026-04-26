@@ -1,54 +1,42 @@
-# =======================================================================================================================
-#                                           Honeypot                                                                    #
-# =======================================================================================================================
+# ==============================================================================================================================
+#                                           Honeypot                                                                           #
+# ==============================================================================================================================
 
 # Libraries
 
 import socket
+
 import threading
+
 import logging
+
 import paramiko
 
-# ── Host Key ────────────────────────────────────────────
+from Database.log_database import create_database
+
+from server import HoneypotServer
+
+# Host Key 
+
 host_key = paramiko.RSAKey.generate(2048)
 
-# ── Logging Setup ───────────────────────────────────────
+# Loggers
+
 logging.basicConfig(
+
     format="%(asctime)s - %(levelname)s - %(message)s",
-    level=logging.INFO
+
+    level=logging.INFO,
+    handlers=[
+        logging.FileHandler("./Logs/honeypot.log"),
+        logging.StreamHandler()
+    ]
 )
 
-# ── SSH Server Interface ────────────────────────────────
-class HoneypotServer(paramiko.ServerInterface):
+# Handle One Connection 
 
-    def __init__(self, client_ip):
-        self.client_ip = client_ip
-        self.attemps_counter = {}
-        self.threshold = randon.randint(2, 5)
-
-    def check_channel_request(self, kind, chanid):
-        if kind == "session":
-            return paramiko.OPEN_SUCCEEDED
-        return paramiko.OPEN_FAILED_ADMINISTRATIVELY_PROHIBITED
-
-    def check_auth_password(self, username, password):
-
-    # first time seeing this username?
-        if username not in self.attempts_counter:
-            self.attempts_counter[username] = 0
-            self.thresholds[username] = random.randint(2, 5)
-
-        # increment counter
-        self.attempts_counter[username] += 1
-
-        # check against threshold
-        if self.attempts_counter[username] >= self.thresholds[username]:
-            return paramiko.AUTH_SUCCESSFUL
-
-        return paramiko.AUTH_FAILED
-
-# ── Handle One Connection ───────────────────────────────
 def handle_connection(client_socket, client_address):
+
     ip = client_address[0]
     logging.info(f"New connection from {ip}")
 
@@ -65,6 +53,12 @@ def handle_connection(client_socket, client_address):
 
         if channel is None:
             logging.warning(f"{ip} connected but never opened a channel")
+            return
+
+        logging.info(f"{ip} opened a shell channel")
+        channel.send(b"Welcome to Ubuntu 22.04 TLS\r\n")
+        channel.close()
+
 
     except Exception as e:
         logging.error(f"Error with {ip}: {e}")
@@ -80,7 +74,8 @@ def handle_connection(client_socket, client_address):
         except:
             pass
 
-# ── Main Server ─────────────────────────────────────────
+# Main Server 
+
 def start_server():
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)

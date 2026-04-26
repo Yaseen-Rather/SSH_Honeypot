@@ -1,5 +1,5 @@
 #===================================================================================================================================================
-#                                                  Logs Database
+#                                                  Logs Database                                                                                   #
 #===================================================================================================================================================
 
 
@@ -13,7 +13,7 @@ from datetime import datetime
 
 # database lock (semaphore)
 
-db_lock = threading.Lock()
+db_lock = threading.Lock() 
 
 # Create Database
 
@@ -39,6 +39,22 @@ def create_database():
     conn.close()
 
 
-create_database()
+# Insert data into the Database
+
+def log_attempt(ip, username, password, accepted):
+
+    with db_lock:
+        conn = sqlite3.connect("./Database/log_database")
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            INSERT INTO attemps (timestamp, ip, username, password, accepted)
+            VALUES (?, ?, ?, ?, ?)
+        """, (datetime.datetime.now().isoformat(), ip, username, password, int(accepted)))
+
+        conn.commit()
+        conn.close()
+
+
 
 
