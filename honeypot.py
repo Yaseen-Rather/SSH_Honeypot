@@ -1,6 +1,6 @@
-# ==============================================================================================================================
-#                                           Honeypot                                                                           #
-# ==============================================================================================================================
+# ======================================================================================================================================
+#                                           Honeypot                                                                                   #
+# ======================================================================================================================================
 
 # Libraries
 
@@ -14,7 +14,9 @@ import paramiko
 
 from Database.log_database import create_database
 
-from server import HoneypotServer, connect_to_decoy, forward_data
+from Server.server import HoneypotServer, connect_to_decoy, forward_data
+
+from Server.config import Honeypot_Port
 
 # Host Key 
 
@@ -107,9 +109,9 @@ def start_server():
 
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server.bind(("0.0.0.0", 2222))
+    server.bind(("0.0.0.0", Honeypot_Port))
     server.listen(100)
-    logging.info("Honeypot listening on port 2222...")
+    logging.info(f"Honeypot listening on port {Honeypot_Port}...")
 
     while True:
         client_socket, client_address = server.accept()
