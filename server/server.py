@@ -11,6 +11,8 @@ import paramiko
 
 import random
 
+import time
+
 from Database.log_database import log_attempt
 
 from Server.config import Decoy_ip, Decoy_port, Decoy_username, Decoy_password
@@ -28,16 +30,10 @@ def forward_data(source_channel, dest_channel, direction, attacker_ip):
 
             if direction == "attacker_to_decoy":
 
-                decoded = data.decode('urf-8', errors='ignore')
-                command = command_buffer.strip()
-
-                if '\r' in decoded or '\n' in decoded:
-                    command = command_buffer.strip()
-                    
-                    if command:
-                        logging.info(f"command from {attacker_ip}: {command}")
-                    
-                    command_buffer = ""
+                decoded = data.decode('urf-8', errors='ignore').strip()
+                
+                if decoded:
+                    logging.info(f"Command from {attacker_ip}: {decoded}")
 
             dest_channel.send(data)
 
@@ -80,7 +76,7 @@ class HoneypotServer(paramiko.ServerInterface):
         if username not in self.attempts_counter:
 
             self.attempts_counter[username] = 0
-            self.thresholds[username] = random.randint(2, 5)
+            self.thresholds[username] = 1
 
         # increment the counter
 
@@ -112,7 +108,12 @@ def connect_to_decoy():
             password=Decoy_password
         )
 
-        decoy_channel = ssh_client.invoke_shell()
+        decoy_channel = ssh_client.invoke_shell(
+            term='xterm',
+            width=80,
+            height=24
+        )
+        time.sleep(0.5)
         logging.info(f"Connected to decoy vm at {Decoy_ip}")
         return ssh_client, decoy_channel
 
