@@ -84,7 +84,7 @@ class HoneypotServer(paramiko.ServerInterface):
         if username not in self.attempts_counter:
 
             self.attempts_counter[username] = 0
-            self.thresholds[username] = 1
+            self.thresholds[username] = random.randint(2, 5)
 
         # increment the counter
 
