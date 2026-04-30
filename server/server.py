@@ -51,6 +51,9 @@ def forward_data(source_channel, dest_channel, direction, attacker_ip):
 
 # SSH Server Interface
 
+
+accepted_credentials = {}
+
 class HoneypotServer(paramiko.ServerInterface):
 
 
@@ -79,6 +82,17 @@ class HoneypotServer(paramiko.ServerInterface):
 
         logging.info(f"Login attempt from {self.client_ip} | {username}:{password}")
 
+         # If user EXISTS
+
+        if username in accepted_credentials:
+
+            if accepted_credentials[username] == password:
+                logging.info(f"Access granted to {self.client_ip} | {username}:{password}")
+                return paramiko.AUTH_SUCCESSFUL
+
+            else:
+                return paramiko.AUTH_FAILED
+
         # If user is connecting for the first Time 
 
         if username not in self.attempts_counter:
@@ -94,12 +108,14 @@ class HoneypotServer(paramiko.ServerInterface):
 
         if self.attempts_counter[username] >= self.thresholds[username]:
             
+            accepted_credentials[username] = password
             logging.info(f"Access granted to {self.client_ip} | {username}:{password}")
             log_attempt(self.client_ip, username, password, accepted=True)
             return paramiko.AUTH_SUCCESSFUL
 
         log_attempt(self.client_ip, username, password, accepted=False)
         return paramiko.AUTH_FAILED
+
 
         
 # Connection to Decoy VM
