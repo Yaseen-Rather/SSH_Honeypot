@@ -163,7 +163,7 @@ Once deployed on a public IP, this honeypot collects:
 
 ## Planned Improvements
 
-- [ ] Oracle Cloud deployment for real-world data collection
+- [ ] Cloud deployment for real-world data collection
 - [ ] GeoIP enrichment on attacker IPs
 - [ ] Dashboard for visualizing attack data
 - [ ] Automated alerts on high-frequency attackers
