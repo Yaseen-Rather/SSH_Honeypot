@@ -1,4 +1,4 @@
-# 🍯 SSH Honeypot — Cloud-Ready MITM Proxy
+# 🍯 SSH Honeypot 
 
 A high-interaction SSH honeypot built from scratch in Python. Instead of emulating a fake shell, this honeypot acts as a **Man-in-the-Middle proxy** between the attacker and a real decoy VM — making it nearly impossible to detect while logging everything.
 
